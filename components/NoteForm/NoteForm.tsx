@@ -1,104 +1,118 @@
+"use client";
+
 import css from "./NoteForm.module.css";
-import { Field, Form, Formik, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createNote } from "@/lib/api"
+import { Metadata } from "next";
+import { useRouter } from "next/navigation";
+import { useNoteStore } from "@/lib/store/noteStore";
  
-interface NoteFormValues {
-    title: string,
-    content: string,
-    tag: 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping'
+// interface NoteFormValues {
+//     title: string,
+//     content: string,
+//     tag: 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping'
+// }
+
+        
+export const metadata: Metadata = {
+    title: "Create New Note",
+    description: "Use this form to create a new note. Fill in the title, content, and select a tag before submitting.",
+    openGraph: {
+        title: "Create New Note",
+        description: "Use this form to create a new note. Fill in the title, content, and select a tag before submitting.",
+        url: "https://localhost:3000/notes/action/create",
+        images: [
+            {
+                url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
+                width: 1200,
+                height: 630,
+                alt: "Create New Note"
+            }
+        ]
+    }
 }
 
-const initialValues: NoteFormValues = {
-    title: '',
-    content: '',
-    tag: "Todo"
-};
 
-const NoteFormSchema = Yup.object().shape({
-    title: Yup.string().min(3, "Title must be at least 3 characters").max(50, "Title must be at most 50 characters").required("Title is required"),
-    content: Yup.string().max(500, "Content must be at most 500 characters"),
-    tag: Yup.string().oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"], "Invalid tag").required("Tag is required")
-});
-
-interface NoteFormProps {
-    onClose: () => void
-}
-
-
-export default function NoteForm({ onClose }: NoteFormProps) { 
+export default function NoteForm() { 
 
     const queryClient = useQueryClient();
+
+    const { draft, setDraft, clearDraft } = useNoteStore();
+
+     const router = useRouter();
 
     const mutation = useMutation({
         mutationFn: createNote,
         onSuccess() {
             queryClient.invalidateQueries({ queryKey: ["notes"] });
-            onClose();
-            mutation.reset();
+            clearDraft();
+            router.push("/notes/filter/all");
         }
     })
 
 
     const handleSubmit = (
-        values: NoteFormValues,
+        event: React.FormEvent
     ) => {
+        event.preventDefault();
         mutation.mutate(
             {
-                title: values.title,
-                content: values.content,
-                tag: values.tag
+                title: draft.title,
+                content: draft.content,
+                tag: draft.tag
             }
         )
     };
 
+    const handleChange = (
+        event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    ) => {
+        
+        setDraft( {
+            ...draft,
+            [event.target.name]: event.target.value
+        });
+    };
 
     return (
-        <Formik
-            initialValues={initialValues}
-            validationSchema={NoteFormSchema}
-            onSubmit={handleSubmit}>
-            <Form className={css.form}>
+
+        <form className={css.form} onSubmit={handleSubmit}>
             <div className={css.formGroup}>
                 <label htmlFor="title">Title</label>
-                <Field id="title" type="text" name="title" className={css.input} />
-                <ErrorMessage component="span" name="title" className={css.error} />
+                <input id="title" type="text" name="title" className={css.input} value={draft.title} onChange={handleChange} />
             </div>
 
             <div className={css.formGroup}>
                 <label htmlFor="content">Content</label>
-                <Field
+                <textarea
                     id="content"
                     name="content"
-                    as="textarea"
                     rows={8}
                     className={css.textarea}
+                    value={draft.content}
+                    onChange={handleChange}
                     />
-                    <ErrorMessage name="content" component="span"  className={css.error} />
-             </div>
+            </div>
 
             <div className={css.formGroup}>
                 <label htmlFor="tag">Tag</label>
-                <Field
+                <select
                     id="tag"
                     name="tag"
-                    as="select"
                     className={css.select}
+                    value={draft.tag}
+                    onChange={handleChange}
                 >
                     <option value="Todo">Todo</option>
                     <option value="Work">Work</option>
                     <option value="Personal">Personal</option>
                     <option value="Meeting">Meeting</option>
                     <option value="Shopping">Shopping</option>
-                </Field>
-                <ErrorMessage name="tag" component="span" className={css.error} />
+                </select>
             </div>
 
             <div className={css.actions}>
-                <button type="button" className={css.cancelButton} onClick={onClose}>
-                Cancel
-                </button>
+
                 <button
                 type="submit"
                 className={css.submitButton}
@@ -107,7 +121,6 @@ export default function NoteForm({ onClose }: NoteFormProps) {
                 Create note
                 </button>
             </div>
-            </Form>
-        </Formik>
+            </form>
 )
 }

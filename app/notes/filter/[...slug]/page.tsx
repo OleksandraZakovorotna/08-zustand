@@ -8,6 +8,30 @@ interface Props {
   }>;
 }
 
+export const generateMetadata = async ({ params }: Props) => {
+  const { slug } = await params;
+  const tag = slug?.[0] || 'all';
+  const title = tag === 'all' ? 'All Notes' : `Notes tagged with "${tag}"`;
+
+  return {
+    title: title,
+    description: `Browse ${title.toLowerCase()} on NoteHub.`,
+    openGraph: {
+      title: title,
+      description: `Browse ${title.toLowerCase()} on NoteHub.`,
+      url: `https://localhost:3000/notes/filter/${tag}`,
+      images: [
+        {
+          url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+  };
+}
+
 
 export default async function Page({
   params }: Props) {
