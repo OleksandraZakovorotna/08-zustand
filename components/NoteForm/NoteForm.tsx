@@ -101,6 +101,16 @@ export default function NoteForm() {
                 >
                 Create note
                 </button>
+                <button                type="button"
+                className={css.cancelButton}
+                onClick={() => {
+                    clearDraft();
+                    router.back();
+                }}
+                disabled={mutation.isPending}
+                >
+                Cancel
+                </button>
             </div>
             </form>
 )

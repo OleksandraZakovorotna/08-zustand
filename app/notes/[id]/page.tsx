@@ -1,12 +1,13 @@
 import { fetchNoteById } from "@/lib/api"
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query"
 import NoteClient from "./NoteDetails.client";
+import { Metadata } from "next";
 
 type Props = {
   params: Promise<{id: string}>
 }
 
-export const generateMetadata = async ({ params }: Props) => {
+export const generateMetadata = async ({ params }: Props): Promise<Metadata> => {
   const { id } = await params;
   const note = await fetchNoteById(id);
 
@@ -16,7 +17,7 @@ export const generateMetadata = async ({ params }: Props) => {
     openGraph: {
       title: note.title,
       description: note.content.slice(0, 30),
-      url: `https://localhost:3000/notes/${id}`,
+      url: `https://example.com/notes/${id}`,
       images: [
         {
           url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
