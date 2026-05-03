@@ -3,7 +3,6 @@
 import css from "./NoteForm.module.css";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createNote } from "@/lib/api"
-import { Metadata } from "next";
 import { useRouter } from "next/navigation";
 import { useNoteStore } from "@/lib/store/noteStore";
  
@@ -13,24 +12,6 @@ import { useNoteStore } from "@/lib/store/noteStore";
 //     tag: 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping'
 // }
 
-        
-export const metadata: Metadata = {
-    title: "Create New Note",
-    description: "Use this form to create a new note. Fill in the title, content, and select a tag before submitting.",
-    openGraph: {
-        title: "Create New Note",
-        description: "Use this form to create a new note. Fill in the title, content, and select a tag before submitting.",
-        url: "https://localhost:3000/notes/action/create",
-        images: [
-            {
-                url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
-                width: 1200,
-                height: 630,
-                alt: "Create New Note"
-            }
-        ]
-    }
-}
 
 
 export default function NoteForm() { 
@@ -52,7 +33,7 @@ export default function NoteForm() {
 
 
     const handleSubmit = (
-        event: React.FormEvent
+        event: React.FormEvent<HTMLFormElement>
     ) => {
         event.preventDefault();
         mutation.mutate(
